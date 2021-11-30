@@ -1,0 +1,44 @@
+trigger:
+- master
+
+resources :
+- repo: self
+
+variables:
+  tag: '$(Build.BuildId)'
+
+stages:
+- stage: Build
+  displayName: Build image
+  jobs:
+  - job: Build
+    displayName:  Build
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: Docker@2
+      inputs:
+        containerRegistry: 'docker-registry'
+        repository: 'kausikisamadder/devopsfile'
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
+        tags: '$(tag)'
+    - task: CopyFiles@2
+      inputs:
+        sourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: '**/*.yml'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    - task: PublishBuildArtifact@1
+      inputs: 
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'helloartifact'
+        publishLocation: 'Container'
+- stage: Deploy
+  displayName: Deploy image
+  jobs:
+  - job: Deploy
+  displayName: Deploy
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - task: DownloadPipelineArtifact@2

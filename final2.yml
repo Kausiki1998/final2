@@ -47,7 +47,7 @@ stages:
       artifactName: 'drop'
       itemPattern: '**/*yaml'
       targetPath: '$(system.ArtifactDirectory)'
-    - task: kubernetManifest@0
+    -task: kubernetManifest@0
       inputs:
         action: 'deploy'
         kubernetesServiceConnection: 'kausikiservice'

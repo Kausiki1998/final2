@@ -18,7 +18,7 @@ stages:
     steps:
     - task: Docker@2
       inputs:
-        containerRegistry: 'docker-registry'
+        containerRegistry: 'docker1'
         repository: 'kausikisamadder/devopsfile'
         command: 'buildAndPush'
         Dockerfile: '**/Dockerfile'
@@ -26,12 +26,12 @@ stages:
     - task: CopyFiles@2
       inputs:
         sourceFolder: '$(System.DefaultWorkingDirectory)'
-        Contents: '**/*.yml'
+        Contents: '**/*.yaml'
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
     - task: PublishBuildArtifact@1
       inputs: 
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'helloartifact'
+        ArtifactName: 'drop'
         publishLocation: 'Container'
 - stage: Deploy
   displayName: Deploy image
@@ -40,5 +40,17 @@ stages:
   displayName: Deploy
   pool:
     vmImage: 'ubuntu-latest'
-  steps:
+   steps:
   - task: DownloadPipelineArtifact@2
+    inputs:
+      buildType: 'current'
+      artifactName: 'drop'
+      itemPattern: '**/*yaml'
+      targetPath: '$(system.ArtifactDirectory)'
+    - task: kubernetManifest@0
+      inputs:
+        action: 'deploy'
+        kubernetesServiceConnection: 'kausikiservice'
+        namespace: 'default'
+        manifests: '$(System.ArtifactsDirectory)/deploy2.yaml'
+        containers:'kausikisamadder/devopsfile:$(tag)'

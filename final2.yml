@@ -48,7 +48,7 @@ stages:
       itemPattern: '**/*yaml'
       targetPath: '$(system.ArtifactDirectory)'
     -task: kubernetManifest@0
-      inputs:
+      inputs :
         action: 'deploy'
         kubernetesServiceConnection: 'kausikiservice'
         namespace: 'default'
